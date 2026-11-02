@@ -1,0 +1,57 @@
+# Vanilla Gravship Expanded - Mechanoid Crew
+
+A RimWorld mod that lets colony mechanoids work the gravship launch ritual from
+[Vanilla Gravship Expanded - Chapter 1](https://steamcommunity.com/sharedfiles/filedetails/?id=3609835606).
+
+## Features
+
+- Mechs can fill the pilot, copilot, gravtech researcher and gravtech engineer roles.
+- Mechs can join as regular crew and count towards the crew count bonus.
+- Works with modded mechanoids.
+- Only gravship launches are affected; every other ritual is vanilla.
+
+## How mech skill works (current version)
+
+Mechanoids have no skill tracker, so vanilla applies no skill scaling to them. This mod gives every
+mech a **virtual skill level**, default **8**, and feeds it into the skill curves of these stats:
+`PilotingAbility`, `ResearchSpeed`, `VGE_GravshipResearch`, `VGE_GravshipMaintenance`.
+
+A specific mech can override it with a mod extension:
+
+```xml
+<modExtensions>
+  <li Class="GravshipMechanoidsPatch.MechCrewSkills">
+    <skills>
+      <li><skill>Intellectual</skill><level>12</level></li>
+    </skills>
+  </li>
+</modExtensions>
+```
+
+See `Common/Patches/MechSkills_Patch.xml` for a working example.
+
+## Planned
+
+- Use the piloting ability that some modded mechs define themselves.
+- Mech attributes instead of one shared default level.
+- In-game settings for the default level.
+
+## Requirements
+
+Odyssey, Biotech, Harmony, Vanilla Gravship Expanded - Chapter 1.
+
+## Building
+
+1. Install the [.NET SDK](https://dotnet.microsoft.com/download).
+2. From the repository root: `dotnet build Source/GravshipMechanoidsPatch.csproj`
+
+NuGet restores the RimWorld reference assemblies (`Krafs.Rimworld.Ref`) and Harmony, so no game files
+are needed to compile. The DLL is written to `1.6/Assemblies/` and copied to `1.7/Assemblies/`.
+
+## Bug reports
+
+Please attach your `Player.log` (lines starting with `[VGE Mech Crew]`) and your mod list.
+
+## License
+
+Code: see `LICENSE`. `About/Preview.png` contains Vanilla Expanded artwork and is not covered by the code license.

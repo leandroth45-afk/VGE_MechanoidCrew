@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+  <!-- Mechs have no skills. By default they act as skill level 8 (MechCrewSettings.DefaultSkillLevel)
+       for piloting / research / gravship stats. Specialist mechs can override individual skills.
+       success="Always" keeps the log clean if a mech isn't installed. -->
+  <Operation Class="PatchOperationAddModExtension" success="Always">
+    <xpath>/Defs/ThingDef[defName="Mech_Constructoid"]</xpath>
+    <value>
+      <li Class="GravshipMechanoidsPatch.MechCrewSkills">
+        <skills>
+          <li><skill>Construction</skill><level>14</level></li>
+          <li><skill>Intellectual</skill><level>10</level></li>
+        </skills>
+      </li>
+    </value>
+  </Operation>
+</Patch>

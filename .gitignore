@@ -1,0 +1,18 @@
+# Build output (published through GitHub Releases / Steam Workshop instead)
+/Source/obj/
+/Source/bin/
+/1.6/Assemblies/*.dll
+/1.6/Assemblies/*.pdb
+/1.7/Assemblies/*.dll
+/1.7/Assemblies/*.pdb
+
+# Written by RimWorld on first Workshop upload; keep a private backup instead
+/About/PublishedFileId.txt
+
+# IDE / OS
+.vs/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+.DS_Store

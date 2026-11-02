@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>GravshipMechanoidsPatch</AssemblyName>
+    <RootNamespace>GravshipMechanoidsPatch</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <DebugType>none</DebugType>
+    <!-- Build output goes straight into the 1.6 folder -->
+    <OutputPath>..\1.6\Assemblies\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Odyssey (gravship) only exists from 1.6 on, so reference the 1.6 assemblies, not 1.5 -->
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+    <PackageReference Include="Lib.Harmony" Version="2.3.*" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!-- Mirror the same DLL into the 1.7 folder (see notes about verifying 1.7) -->
+  <Target Name="CopyTo17" AfterTargets="Build">
+    <Copy SourceFiles="$(OutputPath)$(TargetFileName)" DestinationFolder="..\1.7\Assemblies\" />
+  </Target>
+
+</Project>

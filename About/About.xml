@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Vanilla Gravship Expanded - Mechanoid Crew</name>
+  <author>Leo</author>
+  <packageId>leo.vgemechanoidcrew</packageId>
+  <modVersion>1.0.0</modVersion>
+  <supportedVersions>
+    <li>1.6</li>
+    <li>1.7</li>
+  </supportedVersions>
+  <description>Lets your colony mechanoids work the gravship launch ritual from Vanilla Gravship Expanded - Chapter 1.
+
+Mechs can fill the pilot, copilot, gravtech researcher and gravtech engineer roles, and they can also join the launch as ordinary crew, counting towards the crew count bonus like a colonist would. Works with modded mechanoids too.
+
+Mechs have no skills, so for the piloting, research and gravship stats they act as skill level 8 by default, and the normal skill curves of each stat decide how well they perform. Specialist mechs can be given their own levels through a small XML mod extension.
+
+Only gravship launches are affected. Every other ritual behaves exactly as in vanilla.
+
+Planned: support for the piloting ability that some modded mechs have, and for mech attributes in general.
+
+Requires Biotech, Odyssey, Harmony and Vanilla Gravship Expanded - Chapter 1.</description>
+  <modDependencies>
+    <li>
+      <packageId>brrainz.harmony</packageId>
+      <displayName>Harmony</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+      <downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
+    </li>
+    <li>
+      <packageId>Ludeon.RimWorld.Biotech</packageId>
+      <displayName>RimWorld - Biotech</displayName>
+      <steamWorkshopUrl>https://store.steampowered.com/app/1826140/RimWorld__Biotech/</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>Ludeon.RimWorld.Odyssey</packageId>
+      <displayName>RimWorld - Odyssey</displayName>
+      <steamWorkshopUrl>https://store.steampowered.com/app/3022790/RimWorld__Odyssey/</steamWorkshopUrl>
+    </li>
+    <li>
+      <packageId>vanillaexpanded.gravship</packageId>
+      <displayName>Vanilla Gravship Expanded - Chapter 1</displayName>
+      <steamWorkshopUrl>steam://url/CommunityFilePage/3609835606</steamWorkshopUrl>
+    </li>
+  </modDependencies>
+  <loadAfter>
+    <li>brrainz.harmony</li>
+    <li>vanillaexpanded.gravship</li>
+  </loadAfter>
+</ModMetaData>
