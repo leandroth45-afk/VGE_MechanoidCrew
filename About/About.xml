@@ -3,7 +3,7 @@
   <name>Vanilla Gravship Expanded - Mechanoid Crew</name>
   <author>Leo</author>
   <packageId>leo.vgemechanoidcrew</packageId>
-  <modVersion>1.0.0</modVersion>
+  <modVersion>1.0.1</modVersion>
   <supportedVersions>
     <li>1.6</li>
     <li>1.7</li>
@@ -12,9 +12,11 @@
 
 Mechs can fill the pilot, copilot, gravtech researcher and gravtech engineer roles, and they can also join the launch as ordinary crew, counting towards the crew count bonus like a colonist would. Works with modded mechanoids too.
 
-Mechs have no skills, so for the piloting, research and gravship stats they act as skill level 8 by default, and the normal skill curves of each stat decide how well they perform. Specialist mechs can be given their own levels through a small XML mod extension.
+Mechs have no skills, so for the piloting, research and gravship stats they act as skill level 8 by default (adjustable in the mod settings), and the normal skill curves of each stat decide how well they perform. Specialist mechs can be given their own levels through a small XML mod extension.
 
 Only gravship launches are affected. Every other ritual behaves exactly as in vanilla.
+
+Nothing is excluded by default: every colony mech can take part. A specific mech can be opted out with the optional MechCrewIgnore mod extension.
 
 Planned: support for the piloting ability that some modded mechs have, and for mech attributes in general.
 

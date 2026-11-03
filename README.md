@@ -13,10 +13,12 @@ A RimWorld mod that lets colony mechanoids work the gravship launch ritual from
 ## How mech skill works (current version)
 
 Mechanoids have no skill tracker, so vanilla applies no skill scaling to them. This mod gives every
-mech a **virtual skill level**, default **8**, and feeds it into the skill curves of these stats:
+mech a **virtual skill level**, default **8** (adjustable), and feeds it into the skill curves of these stats:
 `PilotingAbility`, `ResearchSpeed`, `VGE_GravshipResearch`, `VGE_GravshipMaintenance`.
 
-A specific mech can override it with a mod extension:
+The default level can be changed in game: Options > Mod settings > VGE Mechanoid Crew (0 to 20).
+
+A specific mech can override it with a mod extension (this takes priority over the setting):
 
 ```xml
 <modExtensions>
@@ -30,11 +32,48 @@ A specific mech can override it with a mod extension:
 
 See `Common/Patches/MechSkills_Patch.xml` for a working example.
 
+## Opting a mech out: `MechCrewIgnore` (optional)
+
+**Nothing is opted out by default.** Every colony mech can fill the pilot, copilot, gravtech researcher and gravtech engineer roles
+and join the crew. `MechCrewIgnore` is a tool you add yourself to a specific mech when you want this mod to leave it alone, for example:
+
+- another mod already handles that mech's gravship roles and you want that mod to stay in charge;
+- you do not want this mod to let that mech pilot or join the crew.
+
+A mech with the extension is not added to the launch pool, is not allowed into roles or crew by this mod, and gets no virtual skill level.
+
+It is **not a ban**: if another mod lets the mech take part, it still can. For a mech that only this mod would allow, opting out simply
+puts it back to vanilla (humans only). The "Board colony mechanoids" fix applies to any mech that takes part, whoever allowed it.
+
+```xml
+<modExtensions>
+  <li Class="GravshipMechanoidsPatch.MechCrewIgnore" />
+</modExtensions>
+```
+
+A disabled example is in `Common/Patches/MechIgnore_Example.xml`.
+
+### Silversol's Stormmarina
+
+That mod already lets its own mechs (`Mech_Marina`, `Mech_MarinaX`, `Mech_Seiren`) pilot and copilot, and handles boarding for
+`Mech_Marinecrew` and `Mech_Phantomsail`, which it deliberately does not let pilot. Both mods can run together. With this mod
+enabled, every colony mech (including Marinecrew and Phantomsail) can take the roles. To keep the original design for those two, add
+`MechCrewIgnore` to them (the example below only applies when Stormmarina is loaded):
+
+```xml
+<Operation Class="PatchOperationFindMod">
+  <mods><li>Silversol's Stormmarina</li></mods>
+  <match Class="PatchOperationAddModExtension">
+    <xpath>/Defs/ThingDef[defName="Mech_Marinecrew" or defName="Mech_Phantomsail"]</xpath>
+    <value><li Class="GravshipMechanoidsPatch.MechCrewIgnore" /></value>
+  </match>
+</Operation>
+```
+
 ## Planned
 
 - Use the piloting ability that some modded mechs define themselves.
 - Mech attributes instead of one shared default level.
-- In-game settings for the default level.
 
 ## Requirements
 
