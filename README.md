@@ -30,6 +30,34 @@ A specific mech can override it with a mod extension:
 
 See `Common/Patches/MechSkills_Patch.xml` for a working example.
 
+## Mods that already handle their own mechs
+
+If another mod already gives its own mechs gravship roles, leave those mechs to that mod by adding the
+`MechCrewIgnore` extension to their ThingDef (disabled example in `Common/Patches/MechIgnore_Example.xml`):
+
+```xml
+<modExtensions>
+  <li Class="GravshipMechanoidsPatch.MechCrewIgnore" />
+</modExtensions>
+```
+
+### Silversol's Stormmarina
+
+That mod already lets its own mechs (`Mech_Marina`, `Mech_MarinaX`, `Mech_Seiren`) pilot and copilot, and handles boarding for
+`Mech_Marinecrew` and `Mech_Phantomsail`, which it deliberately does not let pilot. Both mods can run together. With this mod
+enabled, every colony mech (including Marinecrew and Phantomsail) can take the roles. To keep the original design for those two, add
+`MechCrewIgnore` to them (the example below only applies when Stormmarina is loaded):
+
+```xml
+<Operation Class="PatchOperationFindMod">
+  <mods><li>Silversol's Stormmarina</li></mods>
+  <match Class="PatchOperationAddModExtension">
+    <xpath>/Defs/ThingDef[defName="Mech_Marinecrew" or defName="Mech_Phantomsail"]</xpath>
+    <value><li Class="GravshipMechanoidsPatch.MechCrewIgnore" /></value>
+  </match>
+</Operation>
+```
+
 ## Planned
 
 - Use the piloting ability that some modded mechs define themselves.

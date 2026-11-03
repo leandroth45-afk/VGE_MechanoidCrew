@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+  <!-- EXAMPLE (disabled). Some mods already give their own mechs gravship roles.
+       To leave such a mech completely to its own mod, copy the operation below out of this comment,
+       replace Mech_ExampleDefName with the mech's ThingDef defName and keep success="Always".
+
+  <Operation Class="PatchOperationAddModExtension" success="Always">
+    <xpath>/Defs/ThingDef[defName="Mech_ExampleDefName"]</xpath>
+    <value>
+      <li Class="GravshipMechanoidsPatch.MechCrewIgnore" />
+    </value>
+  </Operation>
+
+  -->
+</Patch>

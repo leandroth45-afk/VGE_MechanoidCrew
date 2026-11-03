@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using RimWorld;
@@ -46,6 +47,14 @@ namespace GravshipMechanoidsPatch
     public class MechCrewSkills : DefModExtension
     {
         public List<MechCrewSkillEntry> skills = new List<MechCrewSkillEntry>();
+    }
+
+    // Opt-out marker: a mech whose ThingDef carries this extension is left completely alone by this mod
+    // (no pool injection, no role/crew override, no stat adjustment). Use it for mechs from mods that
+    // already handle gravship roles themselves.
+    // XML: <modExtensions><li Class="GravshipMechanoidsPatch.MechCrewIgnore" /></modExtensions>
+    public class MechCrewIgnore : DefModExtension
+    {
     }
 
     internal static class MechSkills
@@ -101,6 +110,37 @@ namespace GravshipMechanoidsPatch
             return ritual != null && ritual.behavior is RitualBehaviorWorker_GravshipLaunch;
         }
 
+        // A colony mech this mod is responsible for (i.e. not opted out with MechCrewIgnore)
+        public static bool Handles(Pawn p)
+        {
+            return p != null && p.IsColonyMech && !p.def.HasModExtension<MechCrewIgnore>();
+        }
+
+        // Adds the colony mechs this mod handles to the candidate pool of a gravship launch.
+        // Safe to call more than once: mechs already in the pool are never added twice.
+        public static int AddMechsToPool(RitualRoleAssignments assignments, Precept_Ritual ritual, Map map)
+        {
+            if (assignments == null || map == null || !IsGravshipRitual(ritual))
+                return 0;
+
+            List<Pawn> pool = assignments.AllCandidatePawns;
+            if (pool == null)
+                return 0;
+
+            int added = 0;
+            List<Pawn> colonyMechs = map.mapPawns.SpawnedColonyMechs;
+            for (int i = 0; i < colonyMechs.Count; i++)
+            {
+                Pawn mech = colonyMechs[i];
+                if (!Handles(mech) || mech.Downed || mech.GetLord() != null || pool.Contains(mech))
+                    continue;
+
+                pool.Add(mech);
+                added++;
+            }
+            return added;
+        }
+
         // RitualRoleAssignments.ritualTarget is private
         public static TargetInfo TargetOf(RitualRoleAssignments assignments)
         {
@@ -151,27 +191,53 @@ namespace GravshipMechanoidsPatch
     {
         public static void Postfix(RitualRoleAssignments __result, Precept_Ritual ritual, Map map)
         {
-            if (__result == null || map == null || !MechCrew.IsGravshipRitual(ritual))
-                return;
-
-            List<Pawn> pool = __result.AllCandidatePawns;
-            if (pool == null)
-                return;
-
-            int added = 0;
-            List<Pawn> colonyMechs = map.mapPawns.SpawnedColonyMechs;
-            for (int i = 0; i < colonyMechs.Count; i++)
-            {
-                Pawn mech = colonyMechs[i];
-                if (mech.Downed || mech.GetLord() != null || pool.Contains(mech))
-                    continue;
-
-                pool.Add(mech);
-                added++;
-            }
-
+            int added = MechCrew.AddMechsToPool(__result, ritual, map);
             if (added > 0 && Prefs.DevMode)
-                Log.Message("[VGE Mech Crew] Added " + added + " colony mech(s) to the gravship launch pool.");
+                Log.Message("[VGE Mech Crew] Added " + added + " colony mech(s) to the gravship launch pool (dialog creation).");
+        }
+    }
+
+    // The gravship launch dialog (Dialog_BeginGravshipLaunch, a Dialog_BeginRitual subclass) may build its
+    // pool by a different route, so inject again once the window is open. This is the same hook the
+    // Stormmarina mod uses for its own mechs; duplicates are skipped.
+    [HarmonyPatch(typeof(Dialog_BeginRitual), "PostOpen")]
+    public static class Patch_DialogPostOpen_AddMechs
+    {
+        public static void Postfix(object __instance)
+        {
+            if (!(__instance is Dialog_BeginRitual dialog))
+                return;
+
+            Traverse t = Traverse.Create(dialog);
+            Precept_Ritual ritual = t.Field("ritual").GetValue<Precept_Ritual>();
+            Map map = t.Field("map").GetValue<Map>();
+            RitualRoleAssignments assignments = t.Field("assignments").GetValue<RitualRoleAssignments>();
+
+            int added = MechCrew.AddMechsToPool(assignments, ritual, map);
+            if (added > 0 && Prefs.DevMode)
+                Log.Message("[VGE Mech Crew] Added " + added + " colony mech(s) to the gravship launch pool (window open).");
+        }
+    }
+
+    // The pilot console validates the chosen navigator and rejects pawns without skills (every mech).
+    // Parameters are read through __args so a renamed parameter in a newer game version cannot break the patch.
+    [HarmonyPatch(typeof(CompPilotConsole), "ValidateNavigator")]
+    public static class Patch_ValidateNavigator
+    {
+        public static void Postfix(object[] __args, ref AcceptanceReport __result)
+        {
+            if (__result.Accepted || !MechCrewSettings.AllowedRoleIds.Contains("pilot"))
+                return;
+            if (__args == null || __args.Length == 0 || !(__args[0] is LocalTargetInfo target))
+                return;
+
+            Pawn pawn = target.Thing as Pawn;
+            if (!MechCrew.Handles(pawn) || pawn.Downed)
+                return;
+            if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
+                return;
+
+            __result = AcceptanceReport.WasAccepted;
         }
     }
 
@@ -187,7 +253,7 @@ namespace GravshipMechanoidsPatch
             LordJob_Ritual ritual, RitualRoleAssignments assignments, Precept_Ritual precept,
             ref bool __result)
         {
-            if (__result || p == null || !p.IsColonyMech)
+            if (__result || !MechCrew.Handles(p))
                 return;
 
             if (!MechCrewSettings.AllowedRoleIds.Contains(__instance.id))
@@ -218,7 +284,7 @@ namespace GravshipMechanoidsPatch
                 return;
 
             Pawn pawn = req.Thing as Pawn;
-            if (pawn == null || pawn.skills != null || !pawn.RaceProps.IsMechanoid)
+            if (pawn == null || pawn.skills != null || !pawn.RaceProps.IsMechanoid || pawn.def.HasModExtension<MechCrewIgnore>())
                 return;
 
             if (!MechCrewSettings.SkillMirroredStats.Contains(___stat.defName))
@@ -245,7 +311,7 @@ namespace GravshipMechanoidsPatch
     {
         public static void Postfix(RitualRoleAssignments __instance, Pawn pawn, ref bool __result)
         {
-            if (__result || !MechCrewSettings.MechsCountAsCrew || pawn == null || !pawn.IsColonyMech)
+            if (__result || !MechCrewSettings.MechsCountAsCrew || !MechCrew.Handles(pawn))
                 return;
 
             Precept_Ritual r = __instance.Ritual;
@@ -280,7 +346,7 @@ namespace GravshipMechanoidsPatch
 
         public static void Postfix(Pawn p, RitualRole role, Precept_Ritual ritual, TargetInfo ritualTarget, ref string __result)
         {
-            if (__result == null || role != null || !MechCrewSettings.MechsCountAsCrew || p == null || !p.IsColonyMech)
+            if (__result == null || role != null || !MechCrewSettings.MechsCountAsCrew || !MechCrew.Handles(p))
                 return;
             if (!MechCrew.IsGravshipRitual(ritual))
                 return;
@@ -311,7 +377,7 @@ namespace GravshipMechanoidsPatch
     {
         public static void Postfix(RitualRoleAssignments assignments, Pawn p, ref bool __result)
         {
-            if (__result || !MechCrewSettings.MechsCountAsCrew || p == null || !p.IsColonyMech)
+            if (__result || !MechCrewSettings.MechsCountAsCrew || !MechCrew.Handles(p))
                 return;
             if (assignments == null || !MechCrew.IsGravshipRitual(assignments.Ritual))
                 return;
@@ -321,6 +387,95 @@ namespace GravshipMechanoidsPatch
                 return;
 
             __result = true;
+        }
+    }
+
+    // =====================================================================
+    // 6. The launch itself.
+    //    RitualBehaviorWorker.TryExecuteOn starts with CanStartRitualNow(), which builds its OWN
+    //    pool (colonists, prisoners, animals - no mechs) and refuses to start when a required role
+    //    has no candidate in it. When that happens TryExecuteOn returns silently, no lord is created,
+    //    and the launch is cancelled right after the dialog's Start button.
+    //    Fix: if the vanilla check refuses, count mechs as candidates for the required roles, then
+    //    ask vanilla again with those roles marked as covered. Only if vanilla then agrees do we
+    //    clear the refusal, so every other reason (wrong layer, already running, ...) still blocks.
+    // =====================================================================
+    [HarmonyPatch(typeof(RitualBehaviorWorker), nameof(RitualBehaviorWorker.CanStartRitualNow))]
+    public static class Patch_CanStartRitualNow
+    {
+        static bool rechecking;
+
+        public static void Postfix(RitualBehaviorWorker __instance, TargetInfo target, Precept_Ritual ritual,
+            Pawn selectedPawn, Dictionary<string, Pawn> forcedForRole, ref string __result)
+        {
+            if (__result == null || rechecking || !target.IsValid || !MechCrew.IsGravshipRitual(ritual))
+                return;
+
+            if (Prefs.DevMode)
+                Log.Message("[VGE Mech Crew] Vanilla launch check refused: " + __result);
+
+            List<RitualRole> roles = ritual.behavior.def.roles;
+            if (roles.NullOrEmpty())
+                return;
+
+            List<Pawn> pool = target.Map.mapPawns.FreeColonistsAndPrisonersSpawned.ToList();
+            List<Pawn> colonyMechs = target.Map.mapPawns.SpawnedColonyMechs;
+            for (int i = 0; i < colonyMechs.Count; i++)
+            {
+                Pawn mech = colonyMechs[i];
+                if (MechCrew.Handles(mech) && !mech.Downed && mech.GetLord() == null)
+                    pool.Add(mech);
+            }
+
+            var forced = forcedForRole != null
+                ? new Dictionary<string, Pawn>(forcedForRole)
+                : new Dictionary<string, Pawn>();
+
+            bool coveredAny = false;
+            foreach (RitualRole role in roles)
+            {
+                if (!role.required || role.substitutable || forced.ContainsKey(role.id))
+                    continue;
+
+                int needed = role.mergeId == null
+                    ? 1
+                    : roles.Count(r => r.mergeId == role.mergeId);
+
+                int found = 0;
+                Pawn firstCandidate = null;
+                for (int i = 0; i < pool.Count; i++)
+                {
+                    if (role.AppliesToPawn(pool[i], out string _, target, null, null, ritual, skipReason: true))
+                    {
+                        found++;
+                        if (firstCandidate == null)
+                            firstCandidate = pool[i];
+                    }
+                }
+
+                if (found >= needed && firstCandidate != null)
+                {
+                    forced[role.id] = firstCandidate; // vanilla only checks ContainsKey(role.id)
+                    coveredAny = true;
+                }
+            }
+
+            if (!coveredAny)
+                return;
+
+            rechecking = true;
+            try
+            {
+                string again = __instance.CanStartRitualNow(target, ritual, selectedPawn, forced);
+                if (again == null)
+                    __result = null;
+                else if (Prefs.DevMode)
+                    Log.Message("[VGE Mech Crew] Still refused after counting mechs: " + again);
+            }
+            finally
+            {
+                rechecking = false;
+            }
         }
     }
 }
