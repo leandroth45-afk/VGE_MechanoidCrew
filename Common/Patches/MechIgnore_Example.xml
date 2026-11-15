@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Patch>
-<<<<<<< HEAD
   <!-- EXAMPLE (disabled, nothing in this file is active). By default EVERY colony mech can fill the gravship
        launch roles and join the crew. MechCrewIgnore is an optional opt-out for a specific mech: this mod will
        leave it alone (it is not a ban, other mods can still let it take part). Typical use: a mod that already
        handles its own mechs. To opt a mech out, copy the operation below out of this comment,
-=======
-  <!-- EXAMPLE (disabled). Some mods already give their own mechs gravship roles.
-       To leave such a mech completely to its own mod, copy the operation below out of this comment,
->>>>>>> e83b6964ac407f0346619e980093a6aa2ae39952
        replace Mech_ExampleDefName with the mech's ThingDef defName and keep success="Always".
 
   <Operation Class="PatchOperationAddModExtension" success="Always">
