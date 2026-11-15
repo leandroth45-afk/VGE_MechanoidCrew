@@ -64,7 +64,6 @@ namespace GravshipMechanoidsPatch
         public List<MechCrewSkillEntry> skills = new List<MechCrewSkillEntry>();
     }
 
-<<<<<<< HEAD
     // =====================================================================
     // Mod settings (Options > Mod settings > VGE Mechanoid Crew)
     // =====================================================================
@@ -122,11 +121,6 @@ namespace GravshipMechanoidsPatch
     // that mech alone (no pool injection, no role/crew override, no virtual skills), e.g. because another mod
     // already handles it. It is not a ban: another mod can still let the mech take part, and the
     // "Board colony mechanoids" fix applies to any mech that takes part.
-=======
-    // Opt-out marker: a mech whose ThingDef carries this extension is left completely alone by this mod
-    // (no pool injection, no role/crew override, no stat adjustment). Use it for mechs from mods that
-    // already handle gravship roles themselves.
->>>>>>> e83b6964ac407f0346619e980093a6aa2ae39952
     // XML: <modExtensions><li Class="GravshipMechanoidsPatch.MechCrewIgnore" /></modExtensions>
     public class MechCrewIgnore : DefModExtension
     {
@@ -553,7 +547,6 @@ namespace GravshipMechanoidsPatch
             }
         }
     }
-<<<<<<< HEAD
 
     // =====================================================================
     // 7. "Board colony mechanoids" option of the gravship launch.
@@ -688,6 +681,4 @@ namespace GravshipMechanoidsPatch
             return __exception;
         }
     }
-=======
->>>>>>> e83b6964ac407f0346619e980093a6aa2ae39952
 }
