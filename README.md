@@ -32,7 +32,6 @@ A specific mech can override it with a mod extension (this takes priority over t
 
 See `Common/Patches/MechSkills_Patch.xml` for a working example.
 
-<<<<<<< HEAD
 ## Opting a mech out: `MechCrewIgnore` (optional)
 
 **Nothing is opted out by default.** Every colony mech can fill the pilot, copilot, gravtech researcher and gravtech engineer roles
@@ -45,6 +44,7 @@ A mech with the extension is not added to the launch pool, is not allowed into r
 
 It is **not a ban**: if another mod lets the mech take part, it still can. For a mech that only this mod would allow, opting out simply
 puts it back to vanilla (humans only). The "Board colony mechanoids" fix applies to any mech that takes part, whoever allowed it.
+
 =======
 ## Mods that already handle their own mechs
 
