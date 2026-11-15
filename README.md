@@ -32,6 +32,7 @@ A specific mech can override it with a mod extension (this takes priority over t
 
 See `Common/Patches/MechSkills_Patch.xml` for a working example.
 
+<<<<<<< HEAD
 ## Opting a mech out: `MechCrewIgnore` (optional)
 
 **Nothing is opted out by default.** Every colony mech can fill the pilot, copilot, gravtech researcher and gravtech engineer roles
@@ -44,6 +45,12 @@ A mech with the extension is not added to the launch pool, is not allowed into r
 
 It is **not a ban**: if another mod lets the mech take part, it still can. For a mech that only this mod would allow, opting out simply
 puts it back to vanilla (humans only). The "Board colony mechanoids" fix applies to any mech that takes part, whoever allowed it.
+=======
+## Mods that already handle their own mechs
+
+If another mod already gives its own mechs gravship roles, leave those mechs to that mod by adding the
+`MechCrewIgnore` extension to their ThingDef (disabled example in `Common/Patches/MechIgnore_Example.xml`):
+>>>>>>> e83b6964ac407f0346619e980093a6aa2ae39952
 
 ```xml
 <modExtensions>
@@ -51,8 +58,11 @@ puts it back to vanilla (humans only). The "Board colony mechanoids" fix applies
 </modExtensions>
 ```
 
+<<<<<<< HEAD
 A disabled example is in `Common/Patches/MechIgnore_Example.xml`.
 
+=======
+>>>>>>> e83b6964ac407f0346619e980093a6aa2ae39952
 ### Silversol's Stormmarina
 
 That mod already lets its own mechs (`Mech_Marina`, `Mech_MarinaX`, `Mech_Seiren`) pilot and copilot, and handles boarding for
